@@ -2150,14 +2150,14 @@ do
 
     function Funcs:AddDropdown(Idx, Info)
         if Info.SpecialType == 'Player' then
-            Info.Values = GetPlayersString();
+            Info.Options = GetPlayersString();
             Info.AllowNull = true;
         elseif Info.SpecialType == 'Team' then
-            Info.Values = GetTeamsString();
+            Info.Options = GetTeamsString();
             Info.AllowNull = true;
         end;
 
-        assert(Info.Values, 'AddDropdown: Missing dropdown value list.');
+        assert(Info.Options, 'AddDropdown: Missing dropdown value list.');
         assert(Info.AllowNull or Info.Default, 'AddDropdown: Missing default value. Pass `AllowNull` as true if this was intentional.')
 
         if (not Info.Text) then
@@ -2165,7 +2165,7 @@ do
         end;
 
         local Dropdown = {
-            Values = Info.Values;
+            Options = Info.Options;
             Value = Info.Multi and {};
             Multi = Info.Multi;
             Type = 'Dropdown';
@@ -2328,11 +2328,11 @@ do
         });
 
         function Dropdown:Display()
-            local Values = Dropdown.Values;
+            local Options = Dropdown.Options;
             local Str = '';
 
             if Info.Multi then
-                for Idx, Value in next, Values do
+                for Idx, Value in next, Options do
                     if Dropdown.Value[Value] then
                         Str = Str .. Value .. ', ';
                     end;
@@ -2346,7 +2346,7 @@ do
             ItemList.Text = (Str == '' and '--' or Str);
         end;
 
-        function Dropdown:GetActiveValues()
+        function Dropdown:GetActiveOptions()
             if Info.Multi then
                 local T = {};
 
@@ -2361,7 +2361,7 @@ do
         end;
 
         function Dropdown:BuildDropdownList()
-            local Values = Dropdown.Values;
+            local Options = Dropdown.Options;
             local Buttons = {};
 
             for _, Element in next, Scrolling:GetChildren() do
@@ -2372,7 +2372,7 @@ do
 
             local Count = 0;
 
-            for Idx, Value in next, Values do
+            for Idx, Value in next, Options do
                 local Table = {};
 
                 Count = Count + 1;
@@ -2431,7 +2431,7 @@ do
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 then
                         local Try = not Selected;
 
-                        if Dropdown:GetActiveValues() == 1 and (not Try) and (not Info.AllowNull) then
+                        if Dropdown:GetActiveOptions() == 1 and (not Try) and (not Info.AllowNull) then
                         else
                             if Info.Multi then
                                 Selected = Try;
@@ -2478,9 +2478,9 @@ do
             RecalculateListSize(Y);
         end;
 
-        function Dropdown:SetValues(NewValues)
-            if NewValues then
-                Dropdown.Values = NewValues;
+        function Dropdown:SetOptions(NewOptions)
+            if NewOptions then
+                Dropdown.Options = NewOptions;
             end;
 
             Dropdown:BuildDropdownList();
@@ -2508,7 +2508,7 @@ do
                 local nTable = {};
 
                 for Value, Bool in next, Val do
-                    if table.find(Dropdown.Values, Value) then
+                    if table.find(Dropdown.Options, Value) then
                         nTable[Value] = true
                     end;
                 end;
@@ -2517,7 +2517,7 @@ do
             else
                 if (not Val) then
                     Dropdown.Value = nil;
-                elseif table.find(Dropdown.Values, Val) then
+                elseif table.find(Dropdown.Options, Val) then
                     Dropdown.Value = Val;
                 end;
             end;
@@ -2556,18 +2556,18 @@ do
         local Defaults = {}
 
         if type(Info.Default) == 'string' then
-            local Idx = table.find(Dropdown.Values, Info.Default)
+            local Idx = table.find(Dropdown.Options, Info.Default)
             if Idx then
                 table.insert(Defaults, Idx)
             end
         elseif type(Info.Default) == 'table' then
             for _, Value in next, Info.Default do
-                local Idx = table.find(Dropdown.Values, Value)
+                local Idx = table.find(Dropdown.Options, Value)
                 if Idx then
                     table.insert(Defaults, Idx)
                 end
             end
-        elseif type(Info.Default) == 'number' and Dropdown.Values[Info.Default] ~= nil then
+        elseif type(Info.Default) == 'number' and Dropdown.Options[Info.Default] ~= nil then
             table.insert(Defaults, Info.Default)
         end
 
@@ -2575,9 +2575,9 @@ do
             for i = 1, #Defaults do
                 local Index = Defaults[i]
                 if Info.Multi then
-                    Dropdown.Value[Dropdown.Values[Index]] = true
+                    Dropdown.Value[Dropdown.Options[Index]] = true
                 else
-                    Dropdown.Value = Dropdown.Values[Index];
+                    Dropdown.Value = Dropdown.Options[Index];
                 end
 
                 if (not Info.Multi) then break end
@@ -3527,8 +3527,8 @@ function Library:CreateWindow(...)
 
                 local Cursor = Drawing.new('Triangle');
                 Cursor.Thickness = 1;
-                Cursor.Filled = false;
-                Cursor.Visible = false;
+                Cursor.Filled = true;
+                Cursor.Visible = true;
 
                 local CursorOutline = Drawing.new('Triangle');
                 CursorOutline.Thickness = 1;
@@ -3624,7 +3624,7 @@ local function OnPlayerChange()
 
     for _, Value in next, Options do
         if Value.Type == 'Dropdown' and Value.SpecialType == 'Player' then
-            Value:SetValues(PlayerList);
+            Value:SetOptions(PlayerList);
         end;
     end;
 end;
